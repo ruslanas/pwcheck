@@ -32,8 +32,8 @@ fn main() {
 
     let mut args = env::args();
 
-    if args.len() < 3 {
-        println!("Usage: pwcheck <file> <pwd>");
+    if args.len() < 2 {
+        println!("Usage: pwcheck <FILE> [PASSWORD]");
         process::exit(0);
     }
 
@@ -41,14 +41,23 @@ fn main() {
     let fname = args.nth(1)
         .expect("Fail reading filename");
 
+    let mut pwd = String::new();
+
+    match args.nth(0) {
+        Some(v) => pwd = v,
+        None => {
+            println!("Enter plain password:");
+            io::stdin()
+                .read_line(&mut pwd)
+                .expect("Read fail");
+        }
+    }
+
     let mut hasher = Sha1::new();
-    hasher.input_str(
-        args.nth(0)
-            .expect("Fail reading password")
-            .as_str()
-    );
+    hasher.input_str(pwd.trim());
     
-    let hash = hasher.result_str().to_uppercase();
+    let hash = hasher.result_str()
+        .to_uppercase();
 
     let metadata = fs::metadata(fname.clone())
         .expect("Failed to read file metadata");
@@ -75,7 +84,8 @@ fn main() {
         old_pos = new_pos;
         new_pos = (_end + _start) / 2;
 
-        reader.seek(io::SeekFrom::Start(new_pos * 42)).expect("Seek fail");
+        reader.seek(io::SeekFrom::Start(new_pos * 42))
+            .expect("Seek fail");
 
         let mut line = String::new();
         reader.read_line(&mut line)

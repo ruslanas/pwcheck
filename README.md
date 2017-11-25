@@ -1,15 +1,22 @@
 Pwned password checker
 ======================
 
+Tool to check passwords against local copy of passwords
+[exposed](https://www.troyhunt.com/introducing-306-million-freely-downloadable-pwned-passwords/) in data breaches.
+
 Build
 -----
 
-`cargo build --release`
+```shell
+cargo build --release
+```
 
 Usage example
 -------------
 
-`pwcheck pwned-passwords-1.0.txt p@55word`
+```shell
+pwcheck pwned-passwords-1.0.txt p@55word
+```
 
 Output
 ------
@@ -20,4 +27,4 @@ SHA1 3558288C5E578A05536EC28C4C1613AE865FE75C
 Found at line: 63563447
 ```
 
-[Pwned Passwords list](https://haveibeenpwned.com/Passwords)
+[Download Pwned Passwords](https://haveibeenpwned.com/Passwords)
