@@ -63,7 +63,7 @@ fn main() {
         .expect("Failed to read file metadata");
 
     let chars = metadata.len();
-    let lines = chars / 42;
+    let lines = (chars as f64 / 42 as f64).ceil() as u64;
     
     println!("{} password hashes in file.", lines);
     println!("SHA1 {}", hash);

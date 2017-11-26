@@ -1,7 +1,7 @@
 Pwned password checker
 ======================
 
-Tool to check passwords against local copy of passwords
+Tool to check passwords against a local copy of passwords
 [exposed](https://www.troyhunt.com/introducing-306-million-freely-downloadable-pwned-passwords/) in data breaches.
 
 Build
