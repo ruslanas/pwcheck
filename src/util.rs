@@ -34,11 +34,16 @@ pub fn read_line(reader: &mut BufReader<File>, pos: u64) -> String {
     reader.seek(io::SeekFrom::Start(pos * 42))
         .expect("Seek fail");
 
-    let mut line = String::new();
-    reader.read_line(& mut line)
-        .expect("Read line fail");
-    
-    return trim(line);
+    let mut line = [0;42];
+    reader.read(& mut line)
+        .unwrap();
+
+    let mut s = String::new();
+    for i in 0..40 {
+        s.push(line[i] as char);
+    }
+
+    return s;
 }
 
 pub fn trim(input: String) -> String {
