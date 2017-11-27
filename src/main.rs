@@ -16,6 +16,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 extern crate crypto;
+extern crate time;
 
 use std::io;
 use crypto::digest::Digest;
@@ -87,6 +88,8 @@ fn main() {
     let mut old_pos = start;
     let mut found = false;
 
+    let t = time::precise_time_s();
+    
     while !found && (new_pos != old_pos) {
         
         old_pos = new_pos;
@@ -109,10 +112,12 @@ fn main() {
 
     }
 
+    let diff = time::precise_time_s() - t;
+
     if found {
-        println!("Found at line: {}", new_pos);
+        println!("Found at line: {} in {} seconds.", new_pos, diff);
     } else {
-        println!("Not found!");
+        println!("Not found in {} seconds.", diff);
     }
 }
 

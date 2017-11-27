@@ -40,9 +40,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
 name = "pwcheck"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "rust-crypto 0.2.36 (registry+https://github.com/rust-lang/crates.io-index)",
+ "time 0.1.38 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

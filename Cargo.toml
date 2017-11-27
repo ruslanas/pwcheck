@@ -1,7 +1,8 @@
 [package]
 name = "pwcheck"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Ruslanas Balčiūnas <ruslanas.com@gmail.com>"]
 
 [dependencies]
 rust-crypto = "^0.2"
+time = "0.1"
