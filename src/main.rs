@@ -54,13 +54,13 @@ fn main() {
     }
 
     let mut pwd: String = match args.nth(0) {
-        Some(v) => v.trim_right_matches("\r\n").to_string(),
-        None => "".to_string()
+        Some(v) => util::trim(v),
+        None => String::new()
     };
 
     if pwd.is_empty() {
         util::input(& mut pwd, "Enter plain password:");
-        pwd = pwd.trim_right_matches("\r\n").to_string();
+        pwd = util::trim(pwd);
     }
 
     let lines = (metadata.len() as f64 / 42 as f64).ceil() as u64;
@@ -82,24 +82,22 @@ fn main() {
 
     let mut start = 0;
     let mut end = lines - 1;
-    let mut new_pos = end;
+    let mut pos = end;
     let mut old_pos = start;
     let mut found = false;
 
     let t = time::precise_time_s();
     
-    while !found && (new_pos != old_pos) {
+    while !found && (pos != old_pos) {
         
-        old_pos = new_pos;
-        new_pos = (end + start) / 2;
+        old_pos = pos;
+        pos = (end + start) / 2;
 
-        let line = util::read_line(& mut reader, new_pos);
+        let line = util::read_line(& mut reader, pos);
 
-        let cmp = hash.cmp(& line.trim().to_string());
-
-        match cmp {
-            Ordering::Greater => start = new_pos,
-            Ordering::Less => end = new_pos,
+        match hash.cmp(& line) {
+            Ordering::Greater => start = pos,
+            Ordering::Less => end = pos,
             Ordering::Equal => found = true
         }
 
@@ -108,7 +106,7 @@ fn main() {
     let diff = time::precise_time_s() - t;
 
     if found {
-        println!("Found at line: {} in {} seconds.", new_pos, diff);
+        println!("Found at line: {} in {} seconds.", pos, diff);
     } else {
         println!("Not found in {} seconds.", diff);
     }

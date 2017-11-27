@@ -38,7 +38,11 @@ pub fn read_line(reader: &mut BufReader<File>, pos: u64) -> String {
     reader.read_line(& mut line)
         .expect("Read line fail");
     
-    return line;
+    return trim(line);
+}
+
+pub fn trim(input: String) -> String {
+    return input.trim_right_matches("\r\n").to_string();
 }
 
 pub fn sha1_hash(pwd: String) -> String {
