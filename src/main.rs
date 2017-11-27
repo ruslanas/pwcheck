@@ -93,7 +93,14 @@ fn main() {
         old_pos = pos;
         pos = (end + start) / 2;
 
-        let line = util::read_line(& mut reader, pos);
+        let line = match util::read_line(& mut reader, pos) {
+            Ok(v) => v,
+            Err(e) => {
+                println!("Corrupted row: #{}", pos);
+                println!("Error: {}", e);
+                return;
+            }
+        };
 
         match hash.cmp(& line) {
             Ordering::Greater => start = pos,

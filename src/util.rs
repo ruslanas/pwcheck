@@ -29,21 +29,30 @@ pub fn input(mut pwd: & mut String, msg: & str) {
         .unwrap();
 }
 
-pub fn read_line(reader: &mut BufReader<File>, pos: u64) -> String {
+pub fn read_line(reader: &mut BufReader<File>, pos: u64) -> Result<String, String> {
 
     reader.seek(io::SeekFrom::Start(pos * 42))
         .expect("Seek fail");
 
-    let mut line = [0;42];
-    reader.read(& mut line)
+    let mut buff = [0;42];
+    reader.read(& mut buff)
         .unwrap();
+
+    return to_string_validate(buff);
+}
+
+fn to_string_validate(buff: [u8; 42]) -> Result<String, String> {
 
     let mut s = String::new();
     for i in 0..40 {
-        s.push(line[i] as char);
+        let c = buff[i];
+        if !((c > 47 && c < 58) || (c > 64 && c < 71)) {
+            return Err("Invalid ASCII #".to_string() + (c as i16).to_string().as_str());
+        }
+        s.push(c as char);
     }
 
-    return s;
+    return Ok(s);
 }
 
 pub fn trim(input: String) -> String {
