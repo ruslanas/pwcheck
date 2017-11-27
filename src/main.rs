@@ -18,13 +18,11 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 extern crate crypto;
 extern crate time;
 
-use std::io;
-use crypto::digest::Digest;
-use crypto::sha1::Sha1;
+mod util;
+
 use std::fs;
 use std::fs::File;
 use std::io::BufReader;
-use std::io::prelude::*;
 use std::env;
 use std::cmp::Ordering;
 
@@ -61,14 +59,14 @@ fn main() {
     };
 
     if pwd.is_empty() {
-        input(& mut pwd, "Enter plain password:");
+        util::input(& mut pwd, "Enter plain password:");
         pwd = pwd.trim_right_matches("\r\n").to_string();
     }
 
     let lines = (metadata.len() as f64 / 42 as f64).ceil() as u64;
     println!("{} password hashes in file.", lines);
 
-    let hash = sha1_hash(pwd);
+    let hash = util::sha1_hash(pwd);
     println!("SHA1 {}", hash);
 
     let file = File::open(& fname);
@@ -95,12 +93,7 @@ fn main() {
         old_pos = new_pos;
         new_pos = (end + start) / 2;
 
-        reader.seek(io::SeekFrom::Start(new_pos * 42))
-            .expect("Seek fail");
-
-        let mut line = String::new();
-        reader.read_line(&mut line)
-            .expect("Read line fail");
+        let line = util::read_line(& mut reader, new_pos);
 
         let cmp = hash.cmp(& line.trim().to_string());
 
@@ -119,19 +112,4 @@ fn main() {
     } else {
         println!("Not found in {} seconds.", diff);
     }
-}
-
-fn input(mut pwd: & mut String, msg: & str) {
-    println!("{}", msg);
-    io::stdin()
-        .read_line(& mut pwd)
-        .unwrap();
-}
-
-fn sha1_hash(pwd: String) -> String {
-    let mut hasher = Sha1::new();
-    hasher.input_str(pwd.as_str());
-    
-    return hasher.result_str()
-        .to_uppercase();
 }
