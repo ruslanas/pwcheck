@@ -1,6 +1,6 @@
 [package]
 name = "pwcheck"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["Ruslanas Balčiūnas <ruslanas.com@gmail.com>"]
 
 [dependencies]
