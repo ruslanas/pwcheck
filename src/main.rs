@@ -82,8 +82,8 @@ fn main() {
 
     let mut start = 0;
     let mut end = lines - 1;
-    let mut pos = end;
-    let mut old_pos = start;
+    let mut pos = start;
+    let mut old_pos = lines;
     let mut found = false;
 
     let t = time::precise_time_s();
