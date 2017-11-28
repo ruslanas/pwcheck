@@ -24,7 +24,6 @@ use std::fs;
 use std::fs::File;
 use std::io::BufReader;
 use std::env;
-use std::cmp::Ordering;
 
 fn main() {
 
@@ -39,8 +38,7 @@ fn main() {
     let fname = args.nth(1)
         .unwrap();
 
-    let metadata = fs::metadata(& fname);
-    let metadata = match metadata {
+    let metadata = match fs::metadata(& fname) {
         Ok(data) => data,
         Err(e) => {
             println!("Metadata error: {:?}", e.kind());
@@ -69,8 +67,7 @@ fn main() {
     let hash = util::sha1_hash(pwd);
     println!("SHA1 {}", hash);
 
-    let file = File::open(& fname);
-    let file = match file {
+    let file = match File::open(& fname) {
         Ok(f) => f,
         Err(e) => {
             println!("Failed to open file [{:?}]", e.kind());
@@ -78,43 +75,24 @@ fn main() {
         }
     };
     
-    let mut reader = BufReader::new(file);
-
-    let mut start = 0;
-    let mut end = lines - 1;
-    let mut pos = start;
-    let mut old_pos = lines;
-    let mut found = false;
-
     let t = time::precise_time_s();
     
-    while !found && (pos != old_pos) {
-        
-        old_pos = pos;
-        pos = (end + start) / 2;
+    let start = 0;
+    let end = lines - 1;
 
-        let line = match util::read_line(& mut reader, pos) {
-            Ok(v) => v,
-            Err(e) => {
-                println!("Corrupted row: #{}", pos);
-                println!("Error: {}", e);
-                return;
-            }
-        };
+    let mut file_reader = BufReader::new(file);
 
-        match hash.cmp(& line) {
-            Ordering::Greater => start = pos,
-            Ordering::Less => end = pos,
-            Ordering::Equal => found = true
-        }
-
-    }
-
+    let result = util::get_idx(hash, & mut file_reader, start, end);
     let diff = time::precise_time_s() - t;
 
-    if found {
-        println!("Found at line: {} in {} seconds.", pos, diff);
-    } else {
-        println!("Not found in {} seconds.", diff);
-    }
+    let idx = match result {
+        Ok(v) => v,
+        Err(e) => {
+            println!("{} in {} seconds.", e, diff);
+            return;
+        }
+    };
+
+    println!("Found at line {} in {} seconds.", idx, diff);
+
 }

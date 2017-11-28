@@ -21,6 +21,37 @@ use crypto::sha1::Sha1;
 use crypto::digest::Digest;
 use std::io::BufReader;
 use std::io::prelude::*;
+use std::cmp::Ordering;
+
+pub fn get_idx(hash: String, reader: & mut BufReader<File>, from: u64, to: u64) -> Result<u64, String> {
+
+    let mut from = from;
+    let mut to = to;
+    let mut found = false;
+    let mut pos = from;
+    let mut old_pos = to + 1;
+    
+    while !found && (pos != old_pos) {
+        
+        old_pos = pos;
+        pos = (from + to) / 2;
+
+        let line = read_line(reader, pos)?;
+
+        match hash.cmp(& line) {
+            Ordering::Greater => from = pos,
+            Ordering::Less => to = pos,
+            Ordering::Equal => found = true
+        }
+
+    }
+
+    if !found {
+        return Err("Not found".to_string());
+    }
+
+    return Ok(pos);
+}
 
 pub fn input(mut pwd: & mut String, msg: & str) {
     println!("{}", msg);
@@ -29,7 +60,7 @@ pub fn input(mut pwd: & mut String, msg: & str) {
         .unwrap();
 }
 
-pub fn read_line(reader: &mut BufReader<File>, pos: u64) -> Result<String, String> {
+fn read_line(reader: &mut BufReader<File>, pos: u64) -> Result<String, String> {
 
     reader.seek(io::SeekFrom::Start(pos * 42))
         .expect("Seek fail");
@@ -47,7 +78,7 @@ fn to_string_validate(buff: [u8; 42]) -> Result<String, String> {
     for i in 0..40 {
         let c = buff[i];
         if !((c > 47 && c < 58) || (c > 64 && c < 71)) {
-            return Err("Invalid ASCII #".to_string() + (c as i16).to_string().as_str());
+            return Err(format!("Invalid ASCII #{}", (c as u16).to_string().as_str()));
         }
         s.push(c as char);
     }
