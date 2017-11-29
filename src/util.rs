@@ -53,6 +53,11 @@ pub fn get_idx(hash: String, reader: & mut BufReader<File>, from: u64, to: u64) 
     return Ok(pos);
 }
 
+pub fn get_file_reader(fname: String) -> Result<BufReader<File>, io::Error> {
+    let file = File::open(fname)?;
+    Ok(BufReader::new(file))
+}
+
 pub fn input(mut pwd: & mut String, msg: & str) {
     println!("{}", msg);
     io::stdin()

@@ -21,8 +21,6 @@ extern crate time;
 mod util;
 
 use std::fs;
-use std::fs::File;
-use std::io::BufReader;
 use std::env;
 
 fn main() {
@@ -61,27 +59,19 @@ fn main() {
         pwd = util::trim(pwd);
     }
 
-    let lines = (metadata.len() as f64 / 42 as f64).ceil() as u64;
-    println!("{} password hashes in file.", lines);
-
     let hash = util::sha1_hash(pwd);
     println!("SHA1 {}", hash);
 
-    let file = match File::open(& fname) {
-        Ok(f) => f,
-        Err(e) => {
-            println!("Failed to open file [{:?}]", e.kind());
-            return;
-        }
-    };
-    
+    let lines = (metadata.len() as f64 / 42 as f64).ceil() as u64;
+    println!("{} password hashes in file.", lines);
+
     let t = time::precise_time_s();
     
     let start = 0;
     let end = lines - 1;
 
-    let mut file_reader = BufReader::new(file);
-
+    let mut file_reader = util::get_file_reader(fname)
+        .unwrap();
     let result = util::get_idx(hash, & mut file_reader, start, end);
     let diff = time::precise_time_s() - t;
 
