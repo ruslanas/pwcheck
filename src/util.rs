@@ -15,7 +15,9 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+use std::path::Path;
 use std::io;
+use std::fs;
 use std::fs::File;
 use crypto::sha1::Sha1;
 use crypto::digest::Digest;
@@ -23,8 +25,37 @@ use std::io::BufReader;
 use std::io::prelude::*;
 use std::cmp::Ordering;
 
+pub fn find_in_file(path: &Path, hash: &String) -> bool {
+    let lines = line_count(path);
+    println!("{} rows in file `{:?}`.", lines, path.file_name());
+
+    let mut file_reader = get_file_reader(&path).unwrap();
+    let result = get_idx(&hash, &mut file_reader, 0, lines - 1);
+
+    let idx = match result {
+        Ok(v) => v,
+        Err(e) => {
+            println!("{}", e);
+            return false;
+        }
+    };
+
+    println!("Found at line #{}", idx);
+    true
+}
+
+pub fn each<F>(path: &Path, cb: F)
+where
+    F: Fn(&Path),
+{
+    let _: Vec<_> = path.read_dir()
+        .unwrap()
+        .map(|x| cb(x.unwrap().path().as_path()))
+        .collect();
+}
+
 pub fn get_idx(
-    hash: String,
+    hash: &String,
     reader: &mut BufReader<File>,
     from: u64,
     to: u64,
@@ -52,17 +83,22 @@ pub fn get_idx(
         return Err("Not found".to_string());
     }
 
-    return Ok(pos);
+    Ok(pos)
 }
 
-pub fn get_file_reader(fname: String) -> Result<BufReader<File>, io::Error> {
-    let file = File::open(fname)?;
+pub fn get_file_reader(path: &Path) -> Result<BufReader<File>, io::Error> {
+    let file = File::open(path)?;
     Ok(BufReader::new(file))
 }
 
 pub fn input(mut pwd: &mut String, msg: &str) {
     println!("{}", msg);
     io::stdin().read_line(&mut pwd).unwrap();
+}
+
+pub fn line_count(path: &Path) -> u64 {
+    let chars = fs::metadata(path).unwrap().len();
+    (chars as f64 / 42 as f64).ceil() as u64
 }
 
 fn read_line(reader: &mut BufReader<File>, pos: u64) -> Result<String, String> {
@@ -73,7 +109,7 @@ fn read_line(reader: &mut BufReader<File>, pos: u64) -> Result<String, String> {
     let mut buff = [0; 42];
     reader.read(&mut buff).unwrap();
 
-    return to_string_validate(buff);
+    to_string_validate(buff)
 }
 
 fn to_string_validate(buff: [u8; 42]) -> Result<String, String> {
@@ -89,7 +125,7 @@ fn to_string_validate(buff: [u8; 42]) -> Result<String, String> {
         s.push(c as char);
     }
 
-    return Ok(s);
+    Ok(s)
 }
 
 pub fn trim(input: &String) -> String {
@@ -100,5 +136,5 @@ pub fn sha1_hash(pwd: String) -> String {
     let mut hasher = Sha1::new();
     hasher.input_str(pwd.as_str());
 
-    return hasher.result_str().to_uppercase();
+    hasher.result_str().to_uppercase()
 }

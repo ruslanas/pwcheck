@@ -20,7 +20,6 @@ extern crate time;
 
 mod util;
 
-use std::fs;
 use std::env;
 use std::path::Path;
 
@@ -28,23 +27,17 @@ fn main() {
     let mut args = env::args();
 
     if args.len() < 2 {
-        println!("Usage: pwcheck <FILE> [PASSWORD]");
+        println!("Usage: pwcheck <FILE|DIR> [PASSWORD]");
         return;
     }
 
     // consumes preceding elements
     let fname = args.nth(1).unwrap();
 
-    let metadata = match fs::metadata(&fname) {
-        Ok(data) => data,
-        Err(e) => {
-            println!("Metadata error: {:?}", e.kind());
-            return;
-        }
-    };
+    let path = Path::new(&fname);
 
-    if metadata.is_dir() {
-        println!("File expected. Directory found.");
+    if !path.exists() {
+        println!("File or directory not found.");
         return;
     }
 
@@ -58,25 +51,20 @@ fn main() {
     let hash = util::sha1_hash(pwd);
     println!("SHA1 {}", hash);
 
-    let lines = (metadata.len() as f64 / 42 as f64).ceil() as u64;
-    println!("{} password hashes in file.", lines);
-
     let t = time::precise_time_s();
+    if path.is_dir() {
+        util::each(path, |p| {
+            if p.is_dir() {
+                return;
+            }
+            util::find_in_file(p, &hash);
+        });
+    }
 
-    let start = 0;
-    let end = lines - 1;
-
-    let mut file_reader = util::get_file_reader(fname).unwrap();
-    let result = util::get_idx(hash, &mut file_reader, start, end);
+    if path.is_file() && path.extension() != None && path.extension().unwrap() == "txt" {
+        util::find_in_file(path, &hash);
+    }
+    
     let diff = time::precise_time_s() - t;
-
-    let idx = match result {
-        Ok(v) => v,
-        Err(e) => {
-            println!("{} in {} seconds.", e, diff);
-            return;
-        }
-    };
-
-    println!("Found at line {} in {} seconds.", idx, diff);
+    println!("Done in {} seconds.", diff);
 }
