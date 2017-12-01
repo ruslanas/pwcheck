@@ -22,9 +22,9 @@ mod util;
 
 use std::fs;
 use std::env;
+use std::path::Path;
 
 fn main() {
-
     let mut args = env::args();
 
     if args.len() < 2 {
@@ -33,10 +33,9 @@ fn main() {
     }
 
     // consumes preceding elements
-    let fname = args.nth(1)
-        .unwrap();
+    let fname = args.nth(1).unwrap();
 
-    let metadata = match fs::metadata(& fname) {
+    let metadata = match fs::metadata(&fname) {
         Ok(data) => data,
         Err(e) => {
             println!("Metadata error: {:?}", e.kind());
@@ -49,14 +48,11 @@ fn main() {
         return;
     }
 
-    let mut pwd: String = match args.nth(0) {
-        Some(v) => util::trim(v),
-        None => String::new()
-    };
+    let mut pwd = args.nth(0).unwrap_or(String::new());
 
-    if pwd.is_empty() {
-        util::input(& mut pwd, "Enter plain password:");
-        pwd = util::trim(pwd);
+    if util::trim(&pwd).is_empty() {
+        util::input(&mut pwd, "Enter plain password:");
+        pwd = util::trim(&pwd);
     }
 
     let hash = util::sha1_hash(pwd);
@@ -66,13 +62,12 @@ fn main() {
     println!("{} password hashes in file.", lines);
 
     let t = time::precise_time_s();
-    
+
     let start = 0;
     let end = lines - 1;
 
-    let mut file_reader = util::get_file_reader(fname)
-        .unwrap();
-    let result = util::get_idx(hash, & mut file_reader, start, end);
+    let mut file_reader = util::get_file_reader(fname).unwrap();
+    let result = util::get_idx(hash, &mut file_reader, start, end);
     let diff = time::precise_time_s() - t;
 
     let idx = match result {
@@ -84,5 +79,4 @@ fn main() {
     };
 
     println!("Found at line {} in {} seconds.", idx, diff);
-
 }
