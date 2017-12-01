@@ -25,32 +25,50 @@ use std::io::BufReader;
 use std::io::prelude::*;
 use std::cmp::Ordering;
 
-pub fn find_in_file(path: &Path, hash: &String) -> bool {
-    let lines = line_count(path);
-    println!("{} rows in file `{:?}`.", lines, path.file_name());
+pub fn find_in_path(path: &Path, hash: &String) {
+    if path.is_dir() {
+        each(path, |p| {
+            find_in_path(p, hash);
+        });
+        return;
+    }
 
-    let mut file_reader = get_file_reader(&path).unwrap();
+    let lines = match line_count(path) {
+        Ok(v) => v,
+        Err(e) => {
+            println!("{}", e);
+            return;
+        }
+    };
+    if lines < 1 {
+        return;
+    }
+    println!("{} rows in file `{:?}`.", lines, path);
+
+    let mut file_reader = get_file_reader(&path).expect("Fail get reader");
     let result = get_idx(&hash, &mut file_reader, 0, lines - 1);
 
     let idx = match result {
         Ok(v) => v,
-        Err(e) => {
-            println!("{}", e);
-            return false;
+        Err(_e) => {
+            println!("{}", _e);
+            return;
         }
     };
 
     println!("Found at line #{}", idx);
-    true
 }
 
 pub fn each<F>(path: &Path, cb: F)
 where
     F: Fn(&Path),
 {
+    if path.is_file() {
+        return cb(path);
+    }
     let _: Vec<_> = path.read_dir()
-        .unwrap()
-        .map(|x| cb(x.unwrap().path().as_path()))
+        .expect("Nasty!")
+        .map(|x| cb(x.expect("Sh..!").path().as_path()))
         .collect();
 }
 
@@ -96,9 +114,9 @@ pub fn input(mut pwd: &mut String, msg: &str) {
     io::stdin().read_line(&mut pwd).unwrap();
 }
 
-pub fn line_count(path: &Path) -> u64 {
-    let chars = fs::metadata(path).unwrap().len();
-    (chars as f64 / 42 as f64).ceil() as u64
+fn line_count(path: &Path) -> Result<u64, io::Error> {
+    let meta = fs::metadata(path)?;
+    Ok((meta.len() as f64 / 42 as f64).ceil() as u64)
 }
 
 fn read_line(reader: &mut BufReader<File>, pos: u64) -> Result<String, String> {

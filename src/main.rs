@@ -52,19 +52,8 @@ fn main() {
     println!("SHA1 {}", hash);
 
     let t = time::precise_time_s();
-    if path.is_dir() {
-        util::each(path, |p| {
-            if p.is_dir() {
-                return;
-            }
-            util::find_in_file(p, &hash);
-        });
-    }
-
-    if path.is_file() && path.extension() != None && path.extension().unwrap() == "txt" {
-        util::find_in_file(path, &hash);
-    }
-    
+    util::find_in_path(path, &hash);
     let diff = time::precise_time_s() - t;
+
     println!("Done in {} seconds.", diff);
 }
