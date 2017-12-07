@@ -15,6 +15,8 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+extern crate crypto;
+
 use std::path::Path;
 use std::io;
 use std::fs;
@@ -45,7 +47,7 @@ pub fn find_in_path(path: &Path, hash: &String) {
     }
     println!("{} rows in file `{:?}`.", lines, path);
 
-    let mut file_reader = get_file_reader(&path).expect("Fail get reader");
+    let mut file_reader = get_file_reader(&path).expect("Fail");
     let result = get_idx(&hash, &mut file_reader, 0, lines - 1);
 
     let idx = match result {
@@ -114,12 +116,12 @@ pub fn input(mut pwd: &mut String, msg: &str) {
     io::stdin().read_line(&mut pwd).unwrap();
 }
 
-fn line_count(path: &Path) -> Result<u64, io::Error> {
+pub fn line_count(path: &Path) -> Result<u64, io::Error> {
     let meta = fs::metadata(path)?;
     Ok((meta.len() as f64 / 42 as f64).ceil() as u64)
 }
 
-fn read_line(reader: &mut BufReader<File>, pos: u64) -> Result<String, String> {
+pub fn read_line(reader: &mut BufReader<File>, pos: u64) -> Result<String, String> {
     reader
         .seek(io::SeekFrom::Start(pos * 42))
         .expect("Seek fail");

@@ -19,7 +19,7 @@ cargo build --release
 Install
 -------
 
-Create symlink to `target/release/pwcheck` in any directory on executable search PATH.
+Add `target/release` to the executable search PATH.
 
 Usage example
 -------------

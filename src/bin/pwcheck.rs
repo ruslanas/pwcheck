@@ -18,7 +18,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 extern crate crypto;
 extern crate time;
 
-mod util;
+extern crate pwcheck;
+
+use pwcheck as util;
 
 use std::env;
 use std::path::Path;
